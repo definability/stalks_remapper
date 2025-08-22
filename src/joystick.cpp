@@ -2,26 +2,25 @@
 
 namespace
 {
-LPDIRECTINPUTDEVICE8 createJoystick(const LPDIRECTINPUTDEVICE8 joystick);
+LPDIRECTINPUTDEVICE8 createJoystick(LPDIRECTINPUTDEVICE8 joystick);
 
-BOOL CALLBACK CountButtonsCallback(
-    const DIDEVICEOBJECTINSTANCE* pdidoi,
-    VOID* pContext
-);
-}
+BOOL CALLBACK
+CountButtonsCallback(LPCDIDEVICEOBJECTINSTANCE device, VOID *pContext);
+} // namespace
 
-JoystickException::JoystickException(const char* const message)
+JoystickException::JoystickException(const char *const message)
     : std::exception{message}
-{}
+{
+}
 
 Joystick::Joystick(
     const LPDIRECTINPUTDEVICE8 inputDevice,
-    const std::string_view deviceName
-)
+    const std::string_view deviceName)
     : name{deviceName}
-  , joystick{createJoystick(inputDevice)}
-  , button_state{this->countButtons()}
-{}
+    , joystick{createJoystick(inputDevice)}
+    , button_state{this->countButtons()}
+{
+}
 
 Joystick::~Joystick()
 {
@@ -35,17 +34,16 @@ Joystick::~Joystick()
 size_t Joystick::countButtons() const
 {
     size_t buttonCount{};
-    if (FAILED(
-        this->joystick->EnumObjects(CountButtonsCallback, &buttonCount,
-            DIDFT_ALL )
-    ))
+    auto &&status = this->joystick->EnumObjects(
+        CountButtonsCallback, &buttonCount, DIDFT_ALL);
+    if (FAILED(status))
     {
         throw JoystickException("Failed to enumerate Joysticks");
     }
     return buttonCount;
 }
 
-const ButtonState& Joystick::poll()
+const ButtonState &Joystick::poll()
 {
     auto &&joystickState = this->getState();
     for (auto i = 0; i < this->button_state.size; i++)
@@ -55,21 +53,21 @@ const ButtonState& Joystick::poll()
     return this->button_state;
 }
 
-void Joystick::processButton(int i, const bool isPressed)
+void Joystick::processButton(const int index, const bool isPressed)
 {
-    this->button_state.justPressed[i] = false;
-    this->button_state.justDepressed[i] = false;
+    this->button_state.justPressed[index] = false;
+    this->button_state.justDepressed[index] = false;
 
-    if (isPressed && !this->button_state.buttons[i])
+    if (isPressed && !this->button_state.buttons[index])
     {
-        this->button_state.justPressed[i] = true;
+        this->button_state.justPressed[index] = true;
     }
-    else if (!isPressed && this->button_state.buttons[i])
+    else if (!isPressed && this->button_state.buttons[index])
     {
-        this->button_state.justDepressed[i] = true;
+        this->button_state.justDepressed[index] = true;
     }
 
-    this->button_state.buttons[i] = isPressed;
+    this->button_state.buttons[index] = isPressed;
 }
 
 DIJOYSTATE2 Joystick::getState() const
@@ -78,13 +76,12 @@ DIJOYSTATE2 Joystick::getState() const
     {
         if (FAILED(this->joystick->Acquire()))
         {
-            throw JoystickException("Failed to acquire Joystick");
+            throw JoystickException("Failed to acquire joystick");
         }
     }
     DIJOYSTATE2 joystickState;
-    if (FAILED(
-        this->joystick->GetDeviceState(sizeof(DIJOYSTATE2), &joystickState)
-    ))
+    if (FAILED(this->joystick->GetDeviceState(
+            sizeof(DIJOYSTATE2), &joystickState)))
     {
         throw JoystickException("Failed to get Joystick state");
     }
@@ -99,31 +96,27 @@ LPDIRECTINPUTDEVICE8 createJoystick(const LPDIRECTINPUTDEVICE8 joystick)
     {
         throw JoystickException("Failed to set data format");
     }
-    if (FAILED(
-        joystick->SetCooperativeLevel(GetConsoleWindow(), DISCL_BACKGROUND |
-            DISCL_NONEXCLUSIVE)
-    ))
+    if (FAILED(joystick->SetCooperativeLevel(
+            GetConsoleWindow(), DISCL_BACKGROUND | DISCL_NONEXCLUSIVE)))
     {
         throw JoystickException("Failed to set cooperative level");
     }
 
     if (FAILED(joystick->Acquire()))
     {
-        throw JoystickException("Failed to acquire Joystick");
+        throw JoystickException("Failed to acquire joystick");
     }
     return joystick;
 }
 
 BOOL CALLBACK CountButtonsCallback(
-    const DIDEVICEOBJECTINSTANCE* const pdidoi,
-    VOID* const pContext
-)
+    const LPCDIDEVICEOBJECTINSTANCE device, VOID *const pContext)
 {
-    auto &&buttonCount = static_cast<size_t*>(pContext);
-    if (pdidoi->dwType & DIDFT_BUTTON)
+    auto &&buttonCount = static_cast<size_t *>(pContext);
+    if (device->dwType & DIDFT_BUTTON)
     {
         (*buttonCount)++;
     }
     return DIENUM_CONTINUE;
 }
-} // nnamespace
+} // namespace

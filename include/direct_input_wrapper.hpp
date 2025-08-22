@@ -10,13 +10,14 @@
 
 class DirectInputWrapper
 {
-public:
+  public:
     DirectInputWrapper();
     ~DirectInputWrapper();
+
     Joystick getDevice(std::string_view name);
 
-private:
+  private:
     LPDIRECTINPUT8 directInput{};
 };
 
-#endif //DIRECT_INPUT_WRAPPER_HPP
+#endif // DIRECT_INPUT_WRAPPER_HPP

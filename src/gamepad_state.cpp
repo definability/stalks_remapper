@@ -2,9 +2,35 @@
 
 #include "button_state.hpp"
 
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <ViGEm/Common.h>
+
+#include <bit>
 #include <bitset>
 #include <utility>
 #include <vector>
+
+namespace
+{
+enum class ButtonName
+{
+#define BUTTON_INDEX(BUTTON)                                                   \
+    std::countr_zero(static_cast<uint16_t>(XUSB_GAMEPAD_##BUTTON))
+    light = BUTTON_INDEX(DPAD_UP),
+    farLight = BUTTON_INDEX(DPAD_DOWN),
+    blinkerLeft = BUTTON_INDEX(DPAD_LEFT),
+    blinkerRight = BUTTON_INDEX(DPAD_RIGHT),
+    wiper = BUTTON_INDEX(START),
+    handbrake = BUTTON_INDEX(BACK),
+    cruiseControl = BUTTON_INDEX(A),
+    cruiseIncrease = BUTTON_INDEX(B),
+    cruiseDecrease = BUTTON_INDEX(X),
+    cruiseCancel = BUTTON_INDEX(Y),
+#undef BUTTON_INDEX
+};
+} // namespace
 
 void GamepadState::stalks(const ButtonState &controller)
 {
@@ -17,11 +43,11 @@ void GamepadState::stalks(const ButtonState &controller)
 void GamepadState::handbrake(const ButtonState &controller)
 {
     static constexpr auto handbrakeButton = 43;
-    this->buttons[std::to_underlying(ButtonName::handbrake)] = controller.
-        buttons[handbrakeButton];
+    this->buttons[std::to_underlying(ButtonName::handbrake)] =
+        controller.buttons[handbrakeButton];
 }
 
-const std::bitset<GamepadState::buttonCount>& GamepadState::getButtons() const
+const std::bitset<GamepadState::buttonCount> &GamepadState::getButtons() const
 {
     return this->buttons;
 }
@@ -54,60 +80,50 @@ void GamepadState::remapBlinkers(const ButtonState &controller)
 
     switch (this->targetBlinker)
     {
-        case BlinkerState::left:
-            if (this->buttons[std::to_underlying(ButtonName::blinkerLeft)])
-            {
-                this->buttons[std::to_underlying(ButtonName::blinkerLeft)] =
-                    false;
-            }
-            else
-            {
-                this->buttons[std::to_underlying(ButtonName::blinkerLeft)] =
-                    true;
-                this->buttons[std::to_underlying(ButtonName::blinkerRight)] =
-                    false;
-                this->currentBlinker = BlinkerState::left;
-            }
-            break;
-        case BlinkerState::right:
-            if (this->buttons[std::to_underlying(ButtonName::blinkerRight)])
-            {
-                this->buttons[std::to_underlying(ButtonName::blinkerRight)] =
-                    false;
-            }
-            else
-            {
-                this->buttons[std::to_underlying(ButtonName::blinkerRight)] =
-                    true;
-                this->buttons[std::to_underlying(ButtonName::blinkerLeft)] =
-                    false;
-                this->currentBlinker = BlinkerState::right;
-            }
-            break;
-        case BlinkerState::off:
-            if (this->buttons[std::to_underlying(ButtonName::blinkerLeft)])
-            {
-                this->buttons[std::to_underlying(ButtonName::blinkerLeft)] =
-                    false;
-            }
-            else if (this->currentBlinker == BlinkerState::left)
-            {
-                this->buttons[std::to_underlying(ButtonName::blinkerLeft)] =
-                    true;
-                this->currentBlinker = BlinkerState::off;
-            }
-            if (this->buttons[std::to_underlying(ButtonName::blinkerRight)])
-            {
-                this->buttons[std::to_underlying(ButtonName::blinkerRight)] =
-                    false;
-            }
-            else if (this->currentBlinker == BlinkerState::right)
-            {
-                this->buttons[std::to_underlying(ButtonName::blinkerRight)] =
-                    true;
-                this->currentBlinker = BlinkerState::off;
-            }
-            break;
+    case BlinkerState::left:
+        if (this->buttons[std::to_underlying(ButtonName::blinkerLeft)])
+        {
+            this->buttons[std::to_underlying(ButtonName::blinkerLeft)] = false;
+        }
+        else
+        {
+            this->buttons[std::to_underlying(ButtonName::blinkerLeft)] = true;
+            this->buttons[std::to_underlying(ButtonName::blinkerRight)] = false;
+            this->currentBlinker = BlinkerState::left;
+        }
+        break;
+    case BlinkerState::right:
+        if (this->buttons[std::to_underlying(ButtonName::blinkerRight)])
+        {
+            this->buttons[std::to_underlying(ButtonName::blinkerRight)] = false;
+        }
+        else
+        {
+            this->buttons[std::to_underlying(ButtonName::blinkerRight)] = true;
+            this->buttons[std::to_underlying(ButtonName::blinkerLeft)] = false;
+            this->currentBlinker = BlinkerState::right;
+        }
+        break;
+    case BlinkerState::off:
+        if (this->buttons[std::to_underlying(ButtonName::blinkerLeft)])
+        {
+            this->buttons[std::to_underlying(ButtonName::blinkerLeft)] = false;
+        }
+        else if (this->currentBlinker == BlinkerState::left)
+        {
+            this->buttons[std::to_underlying(ButtonName::blinkerLeft)] = true;
+            this->currentBlinker = BlinkerState::off;
+        }
+        if (this->buttons[std::to_underlying(ButtonName::blinkerRight)])
+        {
+            this->buttons[std::to_underlying(ButtonName::blinkerRight)] = false;
+        }
+        else if (this->currentBlinker == BlinkerState::right)
+        {
+            this->buttons[std::to_underlying(ButtonName::blinkerRight)] = true;
+            this->currentBlinker = BlinkerState::off;
+        }
+        break;
     }
 }
 
@@ -133,8 +149,9 @@ void GamepadState::remapLights(const ButtonState &controller)
     {
         this->targetLightIntensity = LightIntensity::main;
     }
-    else if (controller.justPressed[lightDipped] && this->currentLightIntensity
-             == this->targetLightIntensity)
+    else if (
+        controller.justPressed[lightDipped] &&
+        this->currentLightIntensity == this->targetLightIntensity)
     {
         if (this->targetLightIntensity == LightIntensity::main)
         {
@@ -146,10 +163,10 @@ void GamepadState::remapLights(const ButtonState &controller)
         }
     }
 
-    if (this->currentLightIntensity == LightIntensity::main && this->
-        targetLightIntensity == LightIntensity::dipped || this->
-        currentLightIntensity == LightIntensity::dipped && this->
-        targetLightIntensity == LightIntensity::main)
+    if (this->currentLightIntensity == LightIntensity::main &&
+            this->targetLightIntensity == LightIntensity::dipped ||
+        this->currentLightIntensity == LightIntensity::dipped &&
+            this->targetLightIntensity == LightIntensity::main)
     {
         if (this->buttons[std::to_underlying(ButtonName::farLight)])
         {
@@ -170,8 +187,8 @@ void GamepadState::remapLights(const ButtonState &controller)
         {
             this->buttons[std::to_underlying(ButtonName::light)] = false;
             this->currentLightIntensity = static_cast<LightIntensity>(
-                (std::to_underlying(this->currentLightIntensity) + 1) % (
-                    std::to_underlying(LightIntensity::main) + 1));
+                (std::to_underlying(this->currentLightIntensity) + 1) %
+                (std::to_underlying(LightIntensity::main) + 1));
         }
         else
         {
@@ -180,15 +197,15 @@ void GamepadState::remapLights(const ButtonState &controller)
         return;
     }
 
-    if (controller.buttons[lightDippedTemporaryOn] && this->targetLightIntensity
-        == this->currentLightIntensity && (
-            this->currentLightIntensity == LightIntensity::off || this->
-            currentLightIntensity == LightIntensity::park))
+    if (controller.buttons[lightDippedTemporaryOn] &&
+        this->targetLightIntensity == this->currentLightIntensity &&
+        (this->currentLightIntensity == LightIntensity::off ||
+         this->currentLightIntensity == LightIntensity::park))
     {
         this->buttons[std::to_underlying(ButtonName::farLight)] = true;
     }
-    if (this->buttons[std::to_underlying(ButtonName::farLight)] && controller.
-        buttons[lightDippedTemporaryOff])
+    if (this->buttons[std::to_underlying(ButtonName::farLight)] &&
+        controller.buttons[lightDippedTemporaryOff])
     {
         this->buttons[std::to_underlying(ButtonName::farLight)] = false;
     }
@@ -206,8 +223,9 @@ void GamepadState::remapWipers(const ButtonState &controller)
     {
         this->targetWiperState = WiperState::off;
     }
-    else if (controller.justPressed[wipersIntermittent] || controller.
-             justPressed[wipersMist])
+    else if (
+        controller.justPressed[wipersIntermittent] ||
+        controller.justPressed[wipersMist])
     {
         this->targetWiperState = WiperState::intermittent;
     }
@@ -242,12 +260,12 @@ void GamepadState::remapCruiseControl(const ButtonState &controller)
     static constexpr auto cruiseIncrease{26};
     static constexpr auto cruiseDecrease{25};
     static constexpr auto cruiseCancel{27};
-    this->buttons[std::to_underlying(ButtonName::cruiseControl)] = controller.
-        buttons[cruiseControl];
-    this->buttons[std::to_underlying(ButtonName::cruiseIncrease)] = controller.
-        buttons[cruiseIncrease];
-    this->buttons[std::to_underlying(ButtonName::cruiseDecrease)] = controller.
-        buttons[cruiseDecrease];
-    this->buttons[std::to_underlying(ButtonName::cruiseCancel)] = controller.
-        buttons[cruiseCancel];
+    this->buttons[std::to_underlying(ButtonName::cruiseControl)] =
+        controller.buttons[cruiseControl];
+    this->buttons[std::to_underlying(ButtonName::cruiseIncrease)] =
+        controller.buttons[cruiseIncrease];
+    this->buttons[std::to_underlying(ButtonName::cruiseDecrease)] =
+        controller.buttons[cruiseDecrease];
+    this->buttons[std::to_underlying(ButtonName::cruiseCancel)] =
+        controller.buttons[cruiseCancel];
 }

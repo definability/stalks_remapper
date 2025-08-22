@@ -4,20 +4,6 @@
 
 #include <bitset>
 
-enum class ButtonName
-{
-    light,
-    farLight,
-    blinkerLeft,
-    blinkerRight,
-    wiper,
-    cruiseControl,
-    cruiseIncrease,
-    cruiseDecrease,
-    cruiseCancel,
-    handbrake,
-};
-
 enum class LightIntensity
 {
     off,
@@ -44,15 +30,15 @@ enum class WiperState
 
 class GamepadState
 {
-public:
+  public:
     static constexpr size_t buttonCount = 16;
 
     void stalks(const ButtonState &controller);
     void handbrake(const ButtonState &controller);
 
-    [[nodiscard]] const std::bitset<buttonCount>& getButtons() const;
+    [[nodiscard]] const std::bitset<buttonCount> &getButtons() const;
 
-private:
+  private:
     void remapBlinkers(const ButtonState &controller);
     void remapLights(const ButtonState &controller);
     void remapWipers(const ButtonState &controller);

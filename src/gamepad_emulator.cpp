@@ -5,12 +5,14 @@
 #include <windows.h>
 #include <ViGEm/Client.h>
 
-GamepadEmulatorException::GamepadEmulatorException(const char* message)
-    : std::exception{message} {}
+GamepadEmulatorException::GamepadEmulatorException(const char *message)
+    : std::exception{message}
+{
+}
 
 GamepadEmulator::GamepadEmulator()
     : client{vigem_alloc()}
-  , target{vigem_target_x360_alloc()}
+    , target{vigem_target_x360_alloc()}
 {
     if (!VIGEM_SUCCESS(vigem_connect(client)))
     {
@@ -42,8 +44,7 @@ GamepadEmulator::~GamepadEmulator()
 void GamepadEmulator::update(const uint16_t buttons) const
 {
     if (!VIGEM_SUCCESS(
-        vigem_target_x360_update(client, target, {.wButtons = buttons})
-    ))
+            vigem_target_x360_update(client, target, {.wButtons = buttons})))
     {
         throw GamepadEmulatorException("Cannot send buttons");
     }

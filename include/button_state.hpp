@@ -13,4 +13,4 @@ struct ButtonState
     const size_t size;
 };
 
-#endif //BUTTON_STATE_HPP
+#endif // BUTTON_STATE_HPP

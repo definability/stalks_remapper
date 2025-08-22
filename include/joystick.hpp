@@ -1,5 +1,5 @@
-#ifndef DI_JOYSTICK_HPP
-#define DI_JOYSTICK_HPP
+#ifndef JOYSTICK_HPP
+#define JOYSTICK_HPP
 #include "button_state.hpp"
 
 #define NOMINMAX
@@ -10,32 +10,31 @@
 #include <string>
 #include <string_view>
 
-class DirectInputJoystick;
-
 class JoystickException : public std::exception
 {
-public:
-    explicit JoystickException(const char* message);
+  public:
+    explicit JoystickException(const char *message);
 };
 
 class Joystick
 {
-public:
-    explicit Joystick(LPDIRECTINPUTDEVICE8 inputDevice, std::string_view
-                      deviceName
-    );
+  public:
+    explicit Joystick(
+        LPDIRECTINPUTDEVICE8 inputDevice,
+        std::string_view deviceName);
     ~Joystick();
 
-    const ButtonState& poll();
+    const ButtonState &poll();
 
     const std::string name;
-private:
-    size_t countButtons() const;
-    void processButton(int i, bool isPressed);
-    DIJOYSTATE2 getState() const;
+
+  private:
+    [[nodiscard]] size_t countButtons() const;
+    [[nodiscard]] DIJOYSTATE2 getState() const;
+    void processButton(int index, bool isPressed);
 
     LPDIRECTINPUTDEVICE8 joystick;
     ButtonState button_state;
 };
 
-#endif //DI_JOYSTICK_HPP
+#endif // JOYSTICK_HPP

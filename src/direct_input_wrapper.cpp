@@ -8,9 +8,7 @@
 namespace
 {
 BOOL CALLBACK enumerateJoystickCallback(
-    const DIDEVICEINSTANCE* currentJoystick,
-    VOID* pContext
-);
+    const DIDEVICEINSTANCE *currentJoystick, VOID *pContext);
 }
 
 DirectInputWrapper::DirectInputWrapper()
@@ -19,9 +17,8 @@ DirectInputWrapper::DirectInputWrapper()
         GetModuleHandle(nullptr),
         DIRECTINPUT_VERSION,
         IID_IDirectInput8,
-        reinterpret_cast<VOID**>(&this->directInput),
-        nullptr
-    );
+        reinterpret_cast<VOID **>(&this->directInput),
+        nullptr);
     if (FAILED(winApiSuccess))
     {
         this->directInput = nullptr;
@@ -37,9 +34,7 @@ DirectInputWrapper::~DirectInputWrapper()
     }
 }
 
-Joystick DirectInputWrapper::getDevice(
-    const std::string_view name
-)
+Joystick DirectInputWrapper::getDevice(const std::string_view name)
 {
     LPDIRECTINPUTDEVICE8 device{};
     auto &&context = std::make_tuple(directInput, &device, name);
@@ -47,8 +42,7 @@ Joystick DirectInputWrapper::getDevice(
         DI8DEVCLASS_GAMECTRL,
         enumerateJoystickCallback,
         &context,
-        DIEDFL_ATTACHEDONLY
-    );
+        DIEDFL_ATTACHEDONLY);
     if (FAILED(winApiSuccess) || device == nullptr)
     {
         throw JoystickException{"Device was not found"};
@@ -59,19 +53,16 @@ Joystick DirectInputWrapper::getDevice(
 namespace
 {
 BOOL CALLBACK enumerateJoystickCallback(
-    const DIDEVICEINSTANCE* const currentJoystick,
-    VOID* const pContext
-)
+    const DIDEVICEINSTANCE *const currentJoystick, VOID *const pContext)
 {
-    auto &&[directInput, device, name] = *static_cast<std::tuple<LPDIRECTINPUT8,
-        LPDIRECTINPUTDEVICE8*, const std::string_view>*>(pContext);
+    auto &&[directInput, device, name] = *static_cast<std::tuple<
+        LPDIRECTINPUT8,
+        LPDIRECTINPUTDEVICE8 *,
+        const std::string_view> *>(pContext);
     if (name == currentJoystick->tszProductName)
     {
         auto &&success = directInput->CreateDevice(
-            currentJoystick->guidInstance,
-            device,
-            nullptr
-        );
+            currentJoystick->guidInstance, device, nullptr);
         if (FAILED(success))
         {
             return DIENUM_CONTINUE;
@@ -82,4 +73,4 @@ BOOL CALLBACK enumerateJoystickCallback(
 
     return DIENUM_CONTINUE;
 }
-}
+} // namespace

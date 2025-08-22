@@ -10,10 +10,26 @@
 #include <string_view>
 #include <thread>
 
-using std::literals::operator ""sv;
+using std::string_view_literals::operator""sv;
+using std::chrono_literals::operator""ms;
 
-int main() try
+constexpr auto reconnectionDelay = 100ms;
+constexpr auto restTime = 30ms;
+
+int main()
+try
 {
+    // GamepadEmulator emulator;
+    // std::cout << "Initialise" << std::endl;
+    // std::this_thread::sleep_for(3000ms);
+    // emulator.update(0);
+    // for (uint16_t i = 0; i < 16; ++i)
+    // {
+    //     auto buttons = static_cast<uint16_t>(1 << i);
+    //     std::cout << "Press " << i << " (" << std::hex << buttons << ')' << std::endl;
+    //     emulator.update(buttons);
+    //     std::this_thread::sleep_for(3000ms);
+    // }
     std::cout << "Initialising..." << std::endl;
     DirectInputWrapper directInput;
     auto &&stalks = directInput.getDevice("MOZA Multi-function Stalk"sv);
@@ -24,24 +40,13 @@ int main() try
     GamepadState state;
 
     static auto running{true};
-    std::signal(
-        SIGTERM,
-        [](int)
-        {
-            running = false;
-        }
-    );
-    std::signal(
-        SIGINT,
-        [](int)
-        {
-            running = false;
-        }
-    );
+    std::signal(SIGTERM, [](int) { running = false; });
+    std::signal(SIGINT, [](int) { running = false; });
     unsigned long previousState{};
 
-    std::cout << "Emulator is ready" << std::endl << std::endl <<
-        "Press Ctrl+C to exit" << std::endl;
+    std::cout << "Emulator is ready" << std::endl
+              << std::endl
+              << "Press Ctrl+C to exit" << std::endl;
     while (running)
     {
         try
@@ -51,9 +56,10 @@ int main() try
         }
         catch (const JoystickException &exception)
         {
-            std::cout << stalks.name << " poll failed: " << exception.what() <<
-                std::endl << " Try again." << std::endl;
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::cout << stalks.name << " poll failed: " << exception.what()
+                      << std::endl
+                      << " Try again." << std::endl;
+            std::this_thread::sleep_for(reconnectionDelay);
             continue;
         }
 
@@ -65,8 +71,9 @@ int main() try
         catch (const JoystickException &exception)
         {
             std::cout << handbrake.name << " poll failed: " << exception.what()
-                << std::endl << " Try again." << std::endl;
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                      << std::endl
+                      << " Try again." << std::endl;
+            std::this_thread::sleep_for(reconnectionDelay);
             continue;
         }
 
@@ -75,11 +82,17 @@ int main() try
         if (currentState != previousState)
         {
             previousState = currentState;
-            std::cout << std::chrono::system_clock::now() << ": " << buttons << std::endl;
+            std::cout << std::chrono::system_clock::now() << ": " << buttons
+                      << std::endl;
         }
-        emulator.update(currentState & std::numeric_limits<uint8_t>::max());
+        if (currentState > std::numeric_limits<uint16_t>::max())
+        {
+            std::cerr << "Unavailable state 0x" << std::hex << currentState
+                      << std::dec << std::endl;
+        }
+        emulator.update(currentState);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+        std::this_thread::sleep_for(restTime);
     }
 
     std::cout << "Exiting..." << std::endl;
@@ -89,15 +102,18 @@ catch (const JoystickException &exception)
 {
     std::cerr << "Joystick exception: " << exception.what() << std::endl;
     return EXIT_FAILURE;
-}catch (const GamepadEmulatorException &exception)
+}
+catch (const GamepadEmulatorException &exception)
 {
     std::cerr << "ViGEM exception: " << exception.what() << std::endl;
     return EXIT_FAILURE;
-}catch (const std::exception &exception)
+}
+catch (const std::exception &exception)
 {
     std::cerr << "Unhandled exception: " << exception.what() << std::endl;
     return EXIT_FAILURE;
-}catch (...)
+}
+catch (...)
 {
     std::cerr << "Unknown exception" << std::endl;
     return EXIT_FAILURE;
