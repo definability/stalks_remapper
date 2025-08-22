@@ -1,5 +1,7 @@
 # Stalks Remapper
 
+[![CMake on a single platform][badge]][badge-status]
+
 [MOZA Multi-functional stalks][moza-stalks] and [MOZA HBP Handbrake][moza-hbp]
 are expensive controllers
 and [City Car Driving][city-car-driving] is a niche driving simulator
@@ -100,6 +102,8 @@ It is more low-level and thus complicated, but may be faster.
 The projects both solutions rely on are technically dead.
 However, they are downloadable and working.
 
+[badge]: https://github.com/definability/stalks_remapper/actions/workflows/cmake-single-platform.yml/badge.svg
+[badge-status]: https://github.com/definability/stalks_remapper/actions/workflows/cmake-single-platform.yml
 [city-car-driving]: https://store.steampowered.com/app/493490/City_Car_Driving/
 [CMake]: https://cmake.org/download/
 [git-submodule]: https://git-scm.com/book/en/v2/Git-Tools-Submodules
