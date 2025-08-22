@@ -47,7 +47,7 @@ Joystick DirectInputWrapper::getDevice(const std::string_view name)
     {
         throw JoystickException{"Device was not found"};
     }
-    return Joystick{device, name};
+    return Joystick{{}, device, name};
 }
 
 namespace

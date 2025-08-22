@@ -19,7 +19,9 @@ class JoystickException : public std::exception
 class Joystick
 {
   public:
+    class Passkey;
     explicit Joystick(
+        const Passkey &,
         LPDIRECTINPUTDEVICE8 inputDevice,
         std::string_view deviceName);
     ~Joystick();
@@ -35,6 +37,13 @@ class Joystick
 
     LPDIRECTINPUTDEVICE8 joystick;
     ButtonState button_state;
+};
+
+class Joystick::Passkey
+{
+    friend class DirectInputWrapper;
+    constexpr Passkey() = default;
+    constexpr ~Passkey() = default;
 };
 
 #endif // JOYSTICK_HPP

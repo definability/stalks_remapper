@@ -14,6 +14,7 @@ JoystickException::JoystickException(const char *const message)
 }
 
 Joystick::Joystick(
+    const Passkey &,
     const LPDIRECTINPUTDEVICE8 inputDevice,
     const std::string_view deviceName)
     : name{deviceName}
