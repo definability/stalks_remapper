@@ -19,17 +19,6 @@ constexpr auto restTime = 30ms;
 int main()
 try
 {
-    // GamepadEmulator emulator;
-    // std::cout << "Initialise" << std::endl;
-    // std::this_thread::sleep_for(3000ms);
-    // emulator.update(0);
-    // for (uint16_t i = 0; i < 16; ++i)
-    // {
-    //     auto buttons = static_cast<uint16_t>(1 << i);
-    //     std::cout << "Press " << i << " (" << std::hex << buttons << ')' << std::endl;
-    //     emulator.update(buttons);
-    //     std::this_thread::sleep_for(3000ms);
-    // }
     std::cout << "Initialising..." << std::endl;
     DirectInputWrapper directInput;
     auto &&stalks = directInput.getDevice("MOZA Multi-function Stalk"sv);
