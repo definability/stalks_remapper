@@ -23,7 +23,7 @@ you may not feed it if `stalks_remapper.exe` was running
 when the game level was loading.
 
 TL;DR: launch `stalks_remapper.exe` only when the game level is loaded,
-and you see your car's cockpit.
+and you see your virtual car's cockpit.
 There is no need to relaunch the remapper when you switch to another level.
 
 ### Setup
@@ -48,8 +48,13 @@ There is no need to relaunch the remapper when you switch to another level.
 
 1. Launch the game.
 2. Set up the desired controls (you can do this anytime).
-3. Load a challenge or a free driving mode.
-4. Launch `stalks_remapper.exe`.
+3. Ensure all your levers are in default position.
+   You must perform this check before starting/restarting any challenge
+   of free driving mode.
+   If you forget to do this, press `Esc` in the game
+   and set your levers to the default position.
+4. Load a challenge or a free driving mode.
+5. Launch `stalks_remapper.exe`.
    Do not exit the game while launching the remapper.
    Simply `Alt-Tab` or `Win` from the game to your OS,
    launch `stalks_remapper.exe`, and return to the game.
@@ -58,7 +63,9 @@ If you turn off the game, turn off the remapper as well.
 If you finish a challenge or free drive and wish to switch to another challenge,
 there is **no need** to stop the remapper.
 
-## Supported keys
+## Features
+
+### Supported keys
 
 - Turning indicators (blinkers): left, right, cancel.
 - Light modes: off, park, main.
@@ -68,6 +75,100 @@ there is **no need** to stop the remapper.
 - Handbrake: on, off.
 - Cruise control: on/off, increase/decrease.
   Not supported by the game, so can be mapped to something else.
+
+### Mapping
+
+If you wish to check whether the application works right,
+these are the buttons that must be emitted
+when you push the corresponding levers of your
+[MOZA Multi-functional stalks][moza-stalks]
+or [MOZA HBP Handbrake][moza-hbp]
+
+- light: D-pad up,
+- far light: D-pad down,
+- left turn indicator: D-pad left,
+- right turn indicator: D-pad right,
+- wiper: Start,
+- handbrake: Back,
+- enable cruise control: A,
+- cruise control increase speed: B,
+- cruise control decrease speed: X,
+- disable cruise control: Y.
+
+[City Car Driving][city-car-driving] allows only one button
+to be mapped per each of the following functions:
+light, left turn indicator, right turn indicator, and wiper.
+This means that, in order to switch from "off" to "slow" wiper mode,
+the button must be clicked twice, and `stalks_remapper.exe` takes care of this.
+To switch from "slow" to "off", the game needs two more clicks.
+
+## Known issues
+
+### Force feedback priority
+
+If `stalks_remapper.exe` is launched before a game map is loaded,
+the game is likely to send force feedback only to the virtual gamepad
+instead of your physical steering wheel.
+In this case, quit the game (close it completely), stop the remapper,
+launch the game again, run a level,
+and start the remapper when you see your virtual cockpit
+(when the level starts).
+
+This problem is caused by the limitations of the [ViGEmBus]
+and the [City Car Driving][city-car-driving]:
+- [ViGEmBus] can simulate two gamepad, both supporting force feedback.
+  I do not know how to turn this feature off without altering [ViGEmBus].
+- [City Car Driving][city-car-driving] seems to use
+  only one force feedback sink.
+  I do not know how to make it choosing the right device.
+
+### Stalks state is not reset automatically
+
+If you launch a [City Car Driving][city-car-driving] level
+and your [MOZA Multi-functional stalks][moza-stalks] levers
+are not in the default position (everything is off),
+the `stalks_remapper.exe` has no way to know that you just launched the game
+because the game does not share telemetry data.
+It is the user's responsibility to ensure all stalks are in the default position
+once you start a game level.
+If you forgot to do this and already started a level,
+press `Esc` and set the levers to the proper positions.
+
+Suppose your park light is active and you restart a level.
+Then, you notice it and return the stalk to "off" position.
+The game will receive two "light" signals and will switch to "main" light.
+Press `Esc` to see the game menu
+and switch the lever to activate the main light on your controller.
+Press `Esc` again &mdash; your turn signal lever
+is now synchronised with the game state.
+
+### Game glitched and stalks state is not synchronised anymore
+
+The game may miss signals during glitches.
+If it happens, press `Esc` to call the menu
+and synchronise the stalks state with the game state.
+
+Suppose the game glitched for 0.1 second,
+and you turned on the left turn signal during this time.
+Then, you reset the stalk when the game glitch finished.
+The left turn indicator will activate in the game.
+Press `Esc` to see the game menu
+and push the lever to activate the left turn signal on your controller.
+Press `Esc` again &mdash; your turn signal lever
+is now synchronised with the game state.
+
+## Alternative
+
+This repository is not the first community attempt
+to make the controller working in the game.
+There is already a [Python script][python-remapper],
+which requires [vJoy] and [Joystick Gremlin][joystick-gremlin].
+
+The solution in this repository requires [ViGEmBus] and [HidHide].
+It is more low-level and thus complicated, but may be faster.
+
+The projects both solutions rely on are technically dead.
+However, they are downloadable and working.
 
 ## How to build
 
@@ -88,19 +189,6 @@ cmake --build buid
 ```
 
 The executable should be available at `build/stalks_remapper.exe`.
-
-## Alternative
-
-This repository is not the first community attempt
-to make the controller working in the game.
-There is already a [Python script][python-remapper],
-which requires [vJoy] and [Joystick Gremlin][joystick-gremlin].
-
-The solution in this repository requires [ViGEmBus] and [HidHide].
-It is more low-level and thus complicated, but may be faster.
-
-The projects both solutions rely on are technically dead.
-However, they are downloadable and working.
 
 [badge]: https://github.com/definability/stalks_remapper/actions/workflows/cmake-single-platform.yml/badge.svg
 [badge-status]: https://github.com/definability/stalks_remapper/actions/workflows/cmake-single-platform.yml
