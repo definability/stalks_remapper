@@ -28,7 +28,9 @@ There is no need to relaunch the remapper when you switch to another level.
 
 ### Setup
 
-1. [Build](#how-to-build) or download `stalks_remapper.exe`.
+1. [Build](#how-to-build) or [download][releases]
+   (scroll to the "Assets" section of the latest release to find the executable)
+   `stalks_remapper.exe`.
 2. Install [ViGEmBus] and restart your computer.
    This is a driver that allows to create a virtual joystick
    the remapper uses to remap the controller keys.
@@ -201,6 +203,7 @@ The executable should be available at `build/stalks_remapper.exe`.
 [moza-hbp]: https://mozaracing.com/products/hbp-handbrake
 [moza-pit-house]: https://mozaracing.com/pages/pit-house
 [python-remapper]: https://steamcommunity.com/app/493490/discussions/0/599650845622041126/
+[releases]: https://github.com/definability/stalks_remapper/releases
 [ViGEmBus]: https://github.com/nefarius/ViGEmBus
 [vJoy]: https://sourceforge.net/projects/vjoystick/
 [vs-build-tools]: https://visualstudio.microsoft.com/visual-cpp-build-tools/
